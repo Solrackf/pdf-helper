@@ -33,6 +33,29 @@ function checkDependencies() {
     return true;
 }
 
+document.getElementById("fileInput").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  
+  reader.onload = async (e) => {
+      try {
+          const arrayBuffer = e.target.result; // Asegurarse de que esto sea un ArrayBuffer válido
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          // Aquí procesas el archivo con la librería de PDF
+          const pdfDoc = await PDFLib.PDFDocument.load(uint8Array);
+          console.log("PDF cargado correctamente");
+      } catch (error) {
+          console.error("Error procesando el PDF:", error);
+      }
+  };
+  
+  reader.readAsArrayBuffer(file);
+});
+
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     if (checkDependencies()) {
@@ -86,51 +109,57 @@ function handleFileSelect(event) {
 
 // Procesamiento de archivos
 async function handleFiles(files) {
-    if (!checkDependencies()) return;
-    
-    const fileArray = Array.from(files);
-    
-    for (const file of fileArray) {
-        if (file.type === 'application/pdf') {
-            try {
-                statusElement.textContent = `Analizando: ${file.name}`;
-                progressContainer.classList.remove('hidden');
+  if (!checkDependencies()) return;
+  
+  const fileArray = Array.from(files);
+  
+  for (const file of fileArray) {
+      console.log("Archivo recibido:", file);
+
+      if (file.type === 'application/pdf') {
+          try {
+              statusElement.textContent = `Analizando: ${file.name}`;
+              progressContainer.classList.remove('hidden');
+              
+              const arrayBuffer = await file.arrayBuffer();
+              const arrayBufferCopy = await file.arrayBuffer();
+              
+              if (arrayBuffer.byteLength === 0) {
+                  throw new Error("El archivo está vacío o no se leyó correctamente.");
+              }
+              
+              try {
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 
-                const arrayBuffer = await file.arrayBuffer();
-                
-                // Validar que es un PDF válido
-                try {
-                    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-                    
-                    const fileObject = {
-                        name: file.name,
-                        data: arrayBuffer,
-                        totalPages: pdf.numPages,
-                        pagesToExtract: `1-${pdf.numPages}`
-                    };
-                    
-                    uploadedFiles.push(fileObject);
-                    renderFileList();
-                    
-                    if (uploadedFiles.length > 0) {
-                        processButton.disabled = false;
-                    }
-                    
-                    progressContainer.classList.add('hidden');
-                } catch (pdfError) {
-                    console.error('Error al validar PDF:', pdfError);
-                    progressContainer.classList.add('hidden');
-                    showNotification(`Error: ${file.name} parece ser un PDF dañado o protegido.`, 'error');
-                }
-            } catch (error) {
-                console.error('Error al procesar el archivo:', error);
-                progressContainer.classList.add('hidden');
-                showNotification(`Error al leer ${file.name}. ${error.message}`, 'error');
-            }
-        } else {
-            showNotification(`${file.name} no es un archivo PDF. Por favor, sube solo archivos PDF.`, 'warning');
-        }
-    }
+                  const fileObject = {
+                      name: file.name,
+                      data: arrayBufferCopy,
+                      totalPages: pdf.numPages,
+                      pagesToExtract: `1-${pdf.numPages}`
+                  };
+                  
+                  uploadedFiles.push(fileObject);
+                  renderFileList();
+                  
+                  if (uploadedFiles.length > 0) {
+                      processButton.disabled = false;
+                  }
+                  
+                  progressContainer.classList.add('hidden');
+              } catch (pdfError) {
+                  console.error('Error al validar PDF:', pdfError);
+                  progressContainer.classList.add('hidden');
+                  showNotification(`Error: ${file.name} parece ser un PDF dañado o protegido.`, 'error');
+              }
+          } catch (error) {
+              console.error('Error al procesar el archivo:', error);
+              progressContainer.classList.add('hidden');
+              showNotification(`Error al leer ${file.name}. ${error.message}`, 'error');
+          }
+      } else {
+          showNotification(`${file.name} no es un archivo PDF. Por favor, sube solo archivos PDF.`, 'warning');
+      }
+  }
 }
 
 // Renderizado de la interfaz
@@ -224,74 +253,87 @@ async function processFiles() {
             statusElement.textContent = `Procesando: ${file.name}`;
             
             try {
-                // Extraer páginas específicas
-                const pdfDoc = await PDFLib.PDFDocument.load(file.data);
-                
-                // Verificar si el documento está encriptado
-                if (pdfDoc.isEncrypted) {
-                    throw new Error('El documento está protegido. No se puede procesar.');
-                }
-                
-                const newPdfDoc = await PDFLib.PDFDocument.create();
-                
-                // Parsear el rango de páginas
-                const pageRanges = parsePageRanges(file.pagesToExtract, file.totalPages);
-                
-                if (pageRanges.length === 0) {
-                    throw new Error('No se especificaron páginas válidas para extraer.');
-                }
-                
-                const uniquePages = [...new Set(pageRanges.flat())];
-                uniquePages.sort((a, b) => a - b);
-                
-                // Validar que hay páginas para copiar
-                if (uniquePages.length === 0) {
-                    throw new Error('El rango de páginas especificado es inválido.');
-                }
-                
-                // Copiar páginas al nuevo documento
-                const pagesToCopy = uniquePages.map(p => p - 1);
-                
-                const copiedPages = await newPdfDoc.copyPages(pdfDoc, pagesToCopy);
-                copiedPages.forEach(page => newPdfDoc.addPage(page));
-                
-                // Aplicar compresión según el nivel seleccionado
-                const compressionLevel = document.getElementById('compressionLevel').value;
-                let pdfBytes;
-                
-                try {
-                    if (compressionLevel === 'high') {
-                        pdfBytes = await newPdfDoc.save({
-                            useObjectStreams: true,
-                            addDefaultPage: false,
-                            objectsPerTick: 50,
-                            compress: true
-                        });
-                    } else if (compressionLevel === 'medium') {
-                        pdfBytes = await newPdfDoc.save({
-                            useObjectStreams: true,
-                            compress: true
-                        });
-                    } else {
-                        pdfBytes = await newPdfDoc.save({
-                            useObjectStreams: false,
-                            compress: false
-                        });
-                    }
-                } catch (saveError) {
-                    console.error('Error al guardar el PDF:', saveError);
-                    throw new Error('Error al comprimir el documento.');
-                }
-                
-                // Descargar el archivo resultante
-                const fileName = file.name.replace('.pdf', '_recortado.pdf');
-                downloadBlob(pdfBytes, fileName);
-                
-                // Actualizar progreso
-                const progressPercentage = ((i + 1) / uploadedFiles.length) * 100;
-                progressBar.style.width = `${progressPercentage}%`;
-                
-            } catch (fileError) {
+							// Extraer páginas específicas
+							const arrayBuffer = await file.data; // Asegurar que es un ArrayBuffer válido
+							const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+
+							// Verificar si el documento está encriptado
+							if (pdfDoc.isEncrypted) {
+								throw new Error(
+									"El documento está protegido. No se puede procesar."
+								);
+							}
+
+							const newPdfDoc = await PDFLib.PDFDocument.create();
+
+							// Parsear el rango de páginas
+							const pageRanges = parsePageRanges(
+								file.pagesToExtract,
+								file.totalPages
+							);
+
+							if (pageRanges.length === 0) {
+								throw new Error(
+									"No se especificaron páginas válidas para extraer."
+								);
+							}
+
+							const uniquePages = [...new Set(pageRanges.flat())];
+							uniquePages.sort((a, b) => a - b);
+
+							// Validar que hay páginas para copiar
+							if (uniquePages.length === 0) {
+								throw new Error(
+									"El rango de páginas especificado es inválido."
+								);
+							}
+
+							// Copiar páginas al nuevo documento
+							const pagesToCopy = uniquePages.map((p) => p - 1);
+
+							const copiedPages = await newPdfDoc.copyPages(
+								pdfDoc,
+								pagesToCopy
+							);
+							copiedPages.forEach((page) => newPdfDoc.addPage(page));
+
+							// Aplicar compresión según el nivel seleccionado
+							const compressionLevel =
+								document.getElementById("compressionLevel").value;
+							let pdfBytes;
+
+							try {
+								if (compressionLevel === "high") {
+									pdfBytes = await newPdfDoc.save({
+										useObjectStreams: true,
+										addDefaultPage: false,
+										objectsPerTick: 50,
+										compress: true,
+									});
+								} else if (compressionLevel === "medium") {
+									pdfBytes = await newPdfDoc.save({
+										useObjectStreams: true,
+										compress: true,
+									});
+								} else {
+									pdfBytes = await newPdfDoc.save({
+										useObjectStreams: false,
+										compress: false,
+									});
+								}
+							} catch (saveError) {
+								console.error("Error al guardar el PDF:", saveError);
+								throw new Error("Error al comprimir el documento.");
+							}
+
+							// Descargar el archivo resultante
+							const fileName = file.name.replace(".pdf", "_recortado.pdf");
+							downloadBlob(pdfBytes, fileName);
+
+							// Actualizar progreso
+							const progressPercentage = ((i + 1) / uploadedFiles.length) * 100;
+							progressBar.style.width = `${progressPercentage}%`;
+						} catch (fileError) {
                 console.error(`Error procesando ${file.name}:`, fileError);
                 showNotification(`Error con ${file.name}: ${fileError.message}`, 'error');
             }
