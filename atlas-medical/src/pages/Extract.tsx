@@ -182,67 +182,77 @@ export function Extract() {
 
             return (
               <div key={file.id} className="rounded-2xl glass-card overflow-hidden">
-                <div className="flex items-center gap-4 p-4">
+
+                {/* ── Header row ── */}
+                <div className="flex items-start gap-3 p-4 pb-3">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
-                    <p className="text-xs mt-0.5 mb-2" style={{ color: 'var(--text-secondary)' }}>{file.totalPages} págs · {formatBytes(file.size)} · {sel.size} seleccionadas</p>
-                    <input
-                      type="text"
-                      value={rangeInputs[file.id] ?? file.pagesToExtract}
-                      onChange={(e) => setRangeInputs((r) => ({ ...r, [file.id]: e.target.value }))}
-                      onBlur={(e) => applyRangeInput(file.id, file.totalPages, e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && applyRangeInput(file.id, file.totalPages, rangeInputs[file.id] ?? '')}
-                      placeholder="ej. 1-5, 8, 11-13"
-                      className="w-full text-xs px-2.5 py-1.5 rounded-lg border outline-none"
-                      style={{
-                        background: 'var(--surface)',
-                        borderColor: 'var(--border)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                      {file.totalPages} págs · {formatBytes(file.size)}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => toggleExpand(file.id)}
-                      className="flex items-center gap-1.5 text-xs font-medium transition-colors px-3 py-1.5 rounded-lg" style={{ color: 'var(--cg-600)', background: 'transparent' }}
+                      className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+                      style={{ color: 'var(--cg-600)' }}
                     >
-                      {isExpanded ? 'Ocultar' : 'Ver páginas'}
+                      {isExpanded ? 'Ocultar' : 'Ver págs'}
                       <ChevronDown size={13} className={clsx('transition-transform', isExpanded && 'rotate-180')} />
                     </button>
-                    <button onClick={() => removeExtractFile(file.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                    <button
+                      onClick={() => removeExtractFile(file.id)}
+                      className="p-1.5 rounded-lg transition-colors"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
                       <X size={15} />
                     </button>
                   </div>
                 </div>
 
+                {/* ── Range input — ALWAYS VISIBLE ── */}
+                <div className="px-4 pb-4">
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                    Páginas a extraer
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={rangeInputs[file.id] ?? file.pagesToExtract}
+                      onChange={(e) => setRangeInputs((r) => ({ ...r, [file.id]: e.target.value }))}
+                      onBlur={(e) => applyRangeInput(file.id, file.totalPages, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { applyRangeInput(file.id, file.totalPages, rangeInputs[file.id] ?? ''); (e.target as HTMLInputElement).blur() } }}
+                      placeholder="ej. 1-5, 8, 11-13, 50-100"
+                      style={{
+                        flex: 1,
+                        fontSize: '0.875rem',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '0.5rem',
+                        border: '1.5px solid var(--cg-300)',
+                        background: 'var(--bg-page)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        minWidth: 0,
+                      }}
+                      onFocus={(e) => { e.target.style.borderColor = '#1bcc61' }}
+                      onBlurCapture={(e) => { e.target.style.borderColor = 'var(--cg-300)' }}
+                    />
+                    <span
+                      className="text-xs font-medium px-2.5 py-1.5 rounded-lg shrink-0"
+                      style={{ background: 'rgba(27,204,97,0.12)', color: 'var(--cg-600)' }}
+                    >
+                      {sel.size} / {file.totalPages}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs hover:underline font-medium" style={{ color: 'var(--cg-500)' }}>Todas</button>
+                    <button onClick={() => selectNone(file.id)} className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>Ninguna</button>
+                  </div>
+                </div>
+
                 {isExpanded && (
-                  <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={rangeInputs[file.id] ?? file.pagesToExtract}
-                          onChange={(e) => setRangeInputs((r) => ({ ...r, [file.id]: e.target.value }))}
-                          onBlur={(e) => applyRangeInput(file.id, file.totalPages, e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && applyRangeInput(file.id, file.totalPages, rangeInputs[file.id] ?? '')}
-                          placeholder={`ej. 1-5, 8, 11-13`}
-                          className="flex-1 text-sm px-3 py-1.5 rounded-lg border outline-none transition-all"
-                          style={{
-                            background: 'var(--surface)',
-                            borderColor: 'var(--border)',
-                            color: 'var(--text-primary)',
-                          }}
-                        />
-                        <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
-                          {(selectedPages[file.id]?.size ?? 0)} / {file.totalPages} págs
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs hover:underline" style={{ color: 'var(--cg-500)' }}>Todas</button>
-                        <button onClick={() => selectNone(file.id)} className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>Ninguna</button>
-                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>· Toca miniaturas o escribe rangos arriba</span>
-                      </div>
-                    </div>
+                  <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(129,244,174,0.2)' }}>
+                    <p className="text-xs py-3" style={{ color: 'var(--text-muted)' }}>Toca para seleccionar / deseleccionar páginas</p>
 
                     {!thumbs ? (
                       <div className="grid grid-cols-6 gap-2">
