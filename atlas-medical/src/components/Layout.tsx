@@ -3,13 +3,20 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Sidebar } from './Sidebar'
 
 const HEARTS = [
-  { left: '8%',  bottom: '12%', dur: 5.2, delay: 0,    size: 14, opacity: 0.18 },
-  { left: '22%', bottom: '5%',  dur: 6.8, delay: 1.4,  size: 11, opacity: 0.14 },
-  { left: '38%', bottom: '18%', dur: 4.9, delay: 2.7,  size: 16, opacity: 0.20 },
-  { left: '55%', bottom: '8%',  dur: 7.1, delay: 0.8,  size: 12, opacity: 0.15 },
-  { left: '70%', bottom: '15%', dur: 5.6, delay: 3.2,  size: 18, opacity: 0.16 },
-  { left: '85%', bottom: '6%',  dur: 6.2, delay: 1.9,  size: 13, opacity: 0.18 },
-  { left: '92%', bottom: '22%', dur: 4.4, delay: 4.1,  size: 10, opacity: 0.12 },
+  { left: '5%',  bottom: '8%',  dur: 5.2, delay: 0,    size: 14, opacity: 0.22 },
+  { left: '14%', bottom: '25%', dur: 7.4, delay: 2.1,  size: 10, opacity: 0.16 },
+  { left: '22%', bottom: '5%',  dur: 6.8, delay: 1.4,  size: 12, opacity: 0.18 },
+  { left: '30%', bottom: '35%', dur: 5.9, delay: 3.8,  size: 9,  opacity: 0.13 },
+  { left: '38%', bottom: '12%', dur: 4.9, delay: 2.7,  size: 16, opacity: 0.22 },
+  { left: '47%', bottom: '28%', dur: 6.3, delay: 0.5,  size: 11, opacity: 0.15 },
+  { left: '55%', bottom: '6%',  dur: 7.1, delay: 0.8,  size: 13, opacity: 0.18 },
+  { left: '63%', bottom: '40%', dur: 5.4, delay: 4.2,  size: 8,  opacity: 0.12 },
+  { left: '70%', bottom: '15%', dur: 5.6, delay: 3.2,  size: 18, opacity: 0.20 },
+  { left: '78%', bottom: '30%', dur: 8.0, delay: 1.1,  size: 10, opacity: 0.14 },
+  { left: '85%', bottom: '8%',  dur: 6.2, delay: 1.9,  size: 14, opacity: 0.20 },
+  { left: '90%', bottom: '45%', dur: 4.7, delay: 5.0,  size: 9,  opacity: 0.13 },
+  { left: '94%', bottom: '20%', dur: 5.8, delay: 0.3,  size: 12, opacity: 0.17 },
+  { left: '2%',  bottom: '50%', dur: 6.6, delay: 3.5,  size: 11, opacity: 0.14 },
 ]
 
 export function Layout() {

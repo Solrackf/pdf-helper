@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Scissors, Layers, Shield, Minimize2, ImageDown, ScissorsLineDashed, StickyNote } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useStore } from '../store/useStore'
 
 const actions = [
   {
@@ -81,63 +82,81 @@ const floatingHearts = [
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const darkMode = useStore(s => s.darkMode)
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
 
   return (
     <div className="space-y-8">
 
-      {/* Hero banner */}
+      {/* Hero banner — light: brilliant gradient / dark: deep glass */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        style={{ background: 'linear-gradient(135deg, #43e583, #1bcc61, #0fa34a)', boxShadow: '0 20px 48px rgba(27,204,97,0.35)' }}
-        className="relative overflow-hidden rounded-3xl p-8 gradient-animated"
+        style={darkMode
+          ? { background: 'rgba(5,28,16,0.75)', border: '1px solid rgba(27,204,97,0.25)', boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(27,204,97,0.08) inset', backdropFilter: 'blur(20px)' }
+          : { background: 'linear-gradient(135deg, #43e583, #1bcc61, #0fa34a)', boxShadow: '0 20px 48px rgba(27,204,97,0.35)' }
+        }
+        className={`relative overflow-hidden rounded-3xl p-8 ${!darkMode ? 'gradient-animated' : ''}`}
       >
-        {/* Floating hearts */}
+        {/* Floating hearts inside banner */}
         {floatingHearts.map((h, i) => (
           <motion.span
             key={i}
             className="absolute top-4 select-none pointer-events-none"
-            style={{ left: h.x, fontSize: h.size }}
-            animate={{ y: [0, -22, 0], rotate: [-8, 8, -8], opacity: [0.5, 1, 0.5] }}
+            style={{ left: h.x, fontSize: h.size, color: darkMode ? 'var(--cg-500)' : undefined }}
+            animate={{ y: [0, -22, 0], rotate: [-8, 8, -8], opacity: darkMode ? [0.15, 0.35, 0.15] : [0.5, 1, 0.5] }}
             transition={{ duration: h.duration, delay: h.delay, repeat: Infinity, ease: 'easeInOut' }}
           >
-            🤍
+            {darkMode ? '💚' : '🤍'}
           </motion.span>
         ))}
 
+        {/* Dark mode: accent line at top */}
+        {darkMode && (
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(27,204,97,0.5), transparent)' }} />
+        )}
+
         <div className="relative z-10">
           <motion.p
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15, duration: 0.4 }}
-            className="text-white/80 text-sm font-medium mb-1"
+            className="text-sm font-medium mb-1"
+            style={{ color: darkMode ? 'var(--cg-400)' : 'rgba(255,255,255,0.85)' }}
           >
             {greeting} 👋
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.25, duration: 0.4 }}
-            className="text-3xl font-bold text-white tracking-tight"
+            className="text-3xl font-bold tracking-tight"
+            style={{ color: darkMode ? 'var(--cg-50)' : 'white' }}
           >
             ¿Qué deseas hacer hoy?
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.4 }}
-            className="text-white/70 mt-2 text-sm"
+            className="mt-2 text-sm"
+            style={{ color: darkMode ? 'var(--cg-400)' : 'rgba(255,255,255,0.72)' }}
           >
             Atlas Morita Toolkit · Procesamiento 100% local ❤️
           </motion.p>
         </div>
 
-        {/* Decorative blobs */}
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="absolute -right-4 -bottom-6 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
+        {/* Light mode decorative blobs */}
+        {!darkMode && (
+          <>
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+            <div className="absolute -right-4 -bottom-6 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
+          </>
+        )}
+        {/* Dark mode glow orb */}
+        {darkMode && (
+          <div className="absolute -right-10 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(27,204,97,0.12), transparent)', filter: 'blur(30px)' }} />
+        )}
       </motion.div>
 
       {/* Action cards */}
