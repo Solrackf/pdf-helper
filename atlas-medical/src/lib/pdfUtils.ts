@@ -6,57 +6,38 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString()
 
+// ── PDF load options safe for large/complex medical PDFs ──────────────────────
+const PDF_LIB_OPTS = {
+  ignoreEncryption: false,
+  throwOnInvalidObject: false,  // tolerate minor corruption in scanned docs
+  updateMetadata: false,        // skip metadata rewrite → faster load
+}
+
+// ── loadPdf: use Uint8Array directly, no extra copy ──────────────────────────
 export async function loadPdf(buffer: ArrayBuffer) {
-  const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
-  return { numPages: pdf.numPages }
+  // pdfjs only needs a view, not ownership — no slice needed here
+  const pdf = await pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    disableAutoFetch: true,    // critical for large PDFs — avoids pre-fetching all pages
+    disableStream: false,
+  }).promise
+  const numPages = pdf.numPages
+  pdf.cleanup()                // free worker memory immediately after page count
+  return { numPages }
 }
 
-export async function renderPageFull(
-  buffer: ArrayBuffer,
-  pageNum: number,
-  scale = 2.0,
-  format: 'png' | 'jpg' = 'png'
-): Promise<string> {
-  const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
-  const page = await pdf.getPage(pageNum)
-  const viewport = page.getViewport({ scale })
-  const canvas = document.createElement('canvas')
-  canvas.width = viewport.width
-  canvas.height = viewport.height
-  const ctx = canvas.getContext('2d')!
-  await page.render({ canvasContext: ctx, viewport, canvas }).promise
-  return format === 'jpg'
-    ? canvas.toDataURL('image/jpeg', 0.92)
-    : canvas.toDataURL('image/png')
-}
-
-export async function renderPageThumbnail(
-  buffer: ArrayBuffer,
-  pageNum: number,
-  scale = 0.3
-): Promise<string> {
-  const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
-  const page = await pdf.getPage(pageNum)
-  const viewport = page.getViewport({ scale })
-  const canvas = document.createElement('canvas')
-  canvas.width = viewport.width
-  canvas.height = viewport.height
-  const ctx = canvas.getContext('2d')!
-  await page.render({ canvasContext: ctx, viewport, canvas }).promise
-  return canvas.toDataURL('image/jpeg', 0.7)
-}
-
+// ── renderAllThumbnails: opens PDF once, renders up to maxPages, destroys ─────
 export async function renderAllThumbnails(
   buffer: ArrayBuffer,
   maxPages: number,
   scale = 0.3,
   onPage?: (num: number, src: string) => void
 ): Promise<Array<{ num: number; src: string }>> {
-  const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
+  const pdf = await pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    disableAutoFetch: true,
+    disableStream: false,
+  }).promise
   const total = Math.min(pdf.numPages, maxPages)
   const results: Array<{ num: number; src: string }> = []
 
@@ -65,24 +46,57 @@ export async function renderAllThumbnails(
       const page = await pdf.getPage(i)
       const viewport = page.getViewport({ scale })
       const canvas = document.createElement('canvas')
-      canvas.width = viewport.width
-      canvas.height = viewport.height
+      canvas.width = Math.round(viewport.width)
+      canvas.height = Math.round(viewport.height)
       const ctx = canvas.getContext('2d')!
       await page.render({ canvasContext: ctx, viewport, canvas }).promise
-      const src = canvas.toDataURL('image/jpeg', 0.7)
+      const src = canvas.toDataURL('image/jpeg', 0.65)
       results.push({ num: i, src })
       onPage?.(i, src)
       page.cleanup()
+      // release canvas memory explicitly
+      canvas.width = 0
+      canvas.height = 0
     } catch {
       results.push({ num: i, src: '' })
     }
   }
+  pdf.cleanup()
   return results
 }
 
+// ── renderPageFull: for Convert module, one page at a time ───────────────────
+export async function renderPageFull(
+  buffer: ArrayBuffer,
+  pageNum: number,
+  scale = 2.0,
+  format: 'png' | 'jpg' = 'png'
+): Promise<string> {
+  const pdf = await pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    disableAutoFetch: true,
+    disableStream: false,
+  }).promise
+  const page = await pdf.getPage(pageNum)
+  const viewport = page.getViewport({ scale })
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(viewport.width)
+  canvas.height = Math.round(viewport.height)
+  const ctx = canvas.getContext('2d')!
+  await page.render({ canvasContext: ctx, viewport, canvas }).promise
+  const result = format === 'jpg'
+    ? canvas.toDataURL('image/jpeg', 0.92)
+    : canvas.toDataURL('image/png')
+  page.cleanup()
+  canvas.width = 0; canvas.height = 0
+  pdf.cleanup()
+  return result
+}
+
+// ── parsePageRanges ───────────────────────────────────────────────────────────
 export function parsePageRanges(rangeStr: string, totalPages: number): number[] {
   const pages: number[] = []
-  const parts = rangeStr.split(',').map((p) => p.trim())
+  const parts = rangeStr.split(',').map((p) => p.trim()).filter(Boolean)
   for (const part of parts) {
     if (part.includes('-')) {
       const [s, e] = part.split('-').map(Number)
@@ -97,39 +111,56 @@ export function parsePageRanges(rangeStr: string, totalPages: number): number[] 
   return [...new Set(pages)].sort((a, b) => a - b)
 }
 
+// ── extractPages: chunked copy for large PDFs ─────────────────────────────────
+// pdf-lib loads the entire doc in RAM. For 4000-page PDFs we copy in batches
+// to avoid a single blocking synchronous operation freezing the UI.
+const CHUNK = 50
+
 export async function extractPages(
   buffer: ArrayBuffer,
   pages: number[],
   compression: 'low' | 'medium' | 'high'
 ): Promise<Uint8Array> {
-  const doc = await PDFDocument.load(buffer)
+  const doc = await PDFDocument.load(buffer, PDF_LIB_OPTS)
   if (doc.isEncrypted) throw new Error('El documento está protegido con contraseña.')
   const newDoc = await PDFDocument.create()
-  const copied = await newDoc.copyPages(doc, pages.map((p) => p - 1))
-  copied.forEach((p) => newDoc.addPage(p))
-  return newDoc.save({
-    useObjectStreams: compression !== 'low',
-    ...(compression === 'high' ? { objectsPerTick: 50 } : {}),
-  })
+
+  for (let i = 0; i < pages.length; i += CHUNK) {
+    const batch = pages.slice(i, i + CHUNK).map((p) => p - 1)
+    const copied = await newDoc.copyPages(doc, batch)
+    copied.forEach((p) => newDoc.addPage(p))
+    // yield to event loop between chunks so UI stays responsive
+    await new Promise<void>((r) => setTimeout(r, 0))
+  }
+
+  return newDoc.save({ useObjectStreams: compression !== 'low' })
 }
 
+// ── mergeDocuments: sequential load+copy+destroy per doc ─────────────────────
 export async function mergeDocuments(
   buffers: ArrayBuffer[],
   compression: 'low' | 'medium' | 'high'
 ): Promise<Uint8Array> {
   const merged = await PDFDocument.create()
   for (const buf of buffers) {
-    const doc = await PDFDocument.load(buf)
-    const pages = await merged.copyPages(doc, doc.getPageIndices())
-    pages.forEach((p) => merged.addPage(p))
+    const doc = await PDFDocument.load(buf, PDF_LIB_OPTS)
+    const indices = doc.getPageIndices()
+    // copy in chunks to avoid blocking
+    for (let i = 0; i < indices.length; i += CHUNK) {
+      const batch = indices.slice(i, i + CHUNK)
+      const pages = await merged.copyPages(doc, batch)
+      pages.forEach((p) => merged.addPage(p))
+      await new Promise<void>((r) => setTimeout(r, 0))
+    }
   }
-  return merged.save({
-    useObjectStreams: compression !== 'low',
-  })
+  return merged.save({ useObjectStreams: compression !== 'low' })
 }
 
+// ── downloadBytes: fix potential partial-buffer view bug ──────────────────────
 export function downloadBytes(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/pdf' })
+  // Copy into a plain ArrayBuffer (avoids SharedArrayBuffer type issues + ensures exact byte range)
+  const plain = new Uint8Array(bytes).buffer as ArrayBuffer
+  const blob = new Blob([plain], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -137,7 +168,7 @@ export function downloadBytes(bytes: Uint8Array, fileName: string) {
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
 
 export function formatBytes(bytes: number): string {
