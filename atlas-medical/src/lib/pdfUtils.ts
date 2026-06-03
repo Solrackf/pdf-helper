@@ -12,6 +12,26 @@ export async function loadPdf(buffer: ArrayBuffer) {
   return { numPages: pdf.numPages }
 }
 
+export async function renderPageFull(
+  buffer: ArrayBuffer,
+  pageNum: number,
+  scale = 2.0,
+  format: 'png' | 'jpg' = 'png'
+): Promise<string> {
+  const copy = buffer.slice(0)
+  const pdf = await pdfjs.getDocument({ data: copy }).promise
+  const page = await pdf.getPage(pageNum)
+  const viewport = page.getViewport({ scale })
+  const canvas = document.createElement('canvas')
+  canvas.width = viewport.width
+  canvas.height = viewport.height
+  const ctx = canvas.getContext('2d')!
+  await page.render({ canvasContext: ctx, viewport, canvas }).promise
+  return format === 'jpg'
+    ? canvas.toDataURL('image/jpeg', 0.92)
+    : canvas.toDataURL('image/png')
+}
+
 export async function renderPageThumbnail(
   buffer: ArrayBuffer,
   pageNum: number,

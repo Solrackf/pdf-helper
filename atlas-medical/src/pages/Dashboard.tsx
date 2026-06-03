@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Scissors, Layers, Shield, Minimize2 } from 'lucide-react'
+import { Scissors, Layers, Shield, Minimize2, ImageDown, ScissorsLineDashed, StickyNote } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const actions = [
@@ -33,12 +33,42 @@ const actions = [
     iconBg: 'linear-gradient(135deg, #1bcc61, #126936)',
     heart: '💚',
   },
+  {
+    to: '/split',
+    icon: ScissorsLineDashed,
+    title: 'Dividir PDF',
+    description: 'Parte un PDF en secciones definiendo rangos de páginas personalizados.',
+    gradientStyle: 'linear-gradient(135deg, #43e583, #0fa34a)',
+    glowStyle: '0 8px 24px rgba(27,204,97,0.2)',
+    iconBg: 'linear-gradient(135deg, #43e583, #10853f)',
+    heart: '✂️',
+  },
+  {
+    to: '/convert',
+    icon: ImageDown,
+    title: 'PDF a imágenes',
+    description: 'Convierte cada página del PDF en una imagen PNG o JPG de alta resolución.',
+    gradientStyle: 'linear-gradient(135deg, #81f4ae, #1bcc61)',
+    glowStyle: '0 8px 24px rgba(27,204,97,0.18)',
+    iconBg: 'linear-gradient(135deg, #1bcc61, #126936)',
+    heart: '🖼️',
+  },
+  {
+    to: '/notes',
+    icon: StickyNote,
+    title: 'Notas',
+    description: 'Bloc de apuntes con etiquetas y colores. Todo guardado en tu dispositivo.',
+    gradientStyle: 'linear-gradient(135deg, #b8fad1, #43e583)',
+    glowStyle: '0 8px 24px rgba(27,204,97,0.15)',
+    iconBg: 'linear-gradient(135deg, #43e583, #0fa34a)',
+    heart: '📝',
+  },
 ]
 
 const tips = [
   { text: 'Todos tus documentos se procesan localmente — nunca salen de tu dispositivo.', emoji: '🔒' },
-  { text: 'Extrae páginas individuales o rangos completos con un solo clic visual.', emoji: '✂️' },
-  { text: 'Al unir documentos puedes reordenarlos antes de generar el PDF final.', emoji: '📋' },
+  { text: 'Las notas se guardan en tu navegador y persisten entre sesiones.', emoji: '📝' },
+  { text: 'Convierte PDFs a imágenes para usarlas en presentaciones o diapositivas.', emoji: '�️' },
 ]
 
 const floatingHearts = [
@@ -111,7 +141,7 @@ export function Dashboard() {
       </motion.div>
 
       {/* Action cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {actions.map(({ to, icon: Icon, title, description, gradientStyle, glowStyle, iconBg, heart }, i) => (
           <motion.button
             key={to}

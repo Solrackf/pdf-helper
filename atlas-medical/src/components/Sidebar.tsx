@@ -1,14 +1,17 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Scissors, Layers, Moon, Sun, Heart, Minimize2 } from 'lucide-react'
+import { Home, Scissors, Layers, Moon, Sun, Heart, Minimize2, ImageDown, ScissorsLineDashed, StickyNote } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { useStore } from '../store/useStore'
 
 const nav = [
-  { to: '/', icon: Home, label: 'Inicio' },
-  { to: '/extract', icon: Scissors, label: 'Extraer páginas' },
-  { to: '/merge', icon: Layers, label: 'Unir documentos' },
-  { to: '/compress', icon: Minimize2, label: 'Comprimir PDF' },
+  { to: '/', icon: Home, label: 'Inicio', group: null },
+  { to: '/extract', icon: Scissors, label: 'Extraer páginas', group: 'PDF' },
+  { to: '/merge', icon: Layers, label: 'Unir documentos', group: 'PDF' },
+  { to: '/split', icon: ScissorsLineDashed, label: 'Dividir PDF', group: 'PDF' },
+  { to: '/compress', icon: Minimize2, label: 'Comprimir PDF', group: 'PDF' },
+  { to: '/convert', icon: ImageDown, label: 'PDF a imágenes', group: 'PDF' },
+  { to: '/notes', icon: StickyNote, label: 'Notas', group: 'Útiles' },
 ]
 
 export function Sidebar() {
@@ -39,55 +42,56 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {nav.map(({ to, icon: Icon, label }, i) => (
-          <motion.div
-            key={to}
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.15 + i * 0.07, duration: 0.35 }}
-          >
-            <NavLink
-              to={to}
-              end={to === '/'}
-              style={({ isActive }) => isActive
-                ? { background: 'rgba(27,204,97,0.12)', color: 'var(--cg-950)' }
-                : { color: 'var(--text-secondary)' }
-              }
-              className={({ isActive }) =>
-                clsx(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group',
-                  isActive
-                    ? 'shadow-sm font-semibold'
-                    : 'hover:opacity-100 opacity-80'
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <motion.div
-                    whileHover={{ scale: 1.2, rotate: -5 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-                  >
-                    <Icon
-                      size={17}
-                      style={{ color: isActive ? 'var(--cg-600)' : 'var(--text-secondary)' }}
-                      className="transition-colors"
-                    />
-                  </motion.div>
-                  {label}
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-indicator"
-                      className="ml-auto w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--cg-500)' }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </>
+      <nav className="flex-1 px-3 py-3 overflow-y-auto">
+        {nav.map(({ to, icon: Icon, label, group }, i) => {
+          const prevGroup = i > 0 ? nav[i - 1].group : undefined
+          const showSeparator = group !== null && group !== prevGroup
+          return (
+            <div key={to}>
+              {showSeparator && (
+                <p className="text-[10px] font-bold uppercase tracking-widest px-3 pt-3 pb-1"
+                  style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>
+                  {group}
+                </p>
               )}
-            </NavLink>
-          </motion.div>
-        ))}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.12 + i * 0.06, duration: 0.3 }}
+              >
+                <NavLink
+                  to={to}
+                  end={to === '/'}
+                  style={({ isActive }) => isActive
+                    ? { background: 'rgba(27,204,97,0.12)', color: 'var(--cg-950)' }
+                    : { color: 'var(--text-secondary)' }
+                  }
+                  className={({ isActive }) =>
+                    clsx(
+                      'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group mb-0.5',
+                      isActive ? 'shadow-sm font-semibold' : 'hover:opacity-100 opacity-75'
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <motion.div whileHover={{ scale: 1.2, rotate: -5 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
+                        <Icon size={16} style={{ color: isActive ? 'var(--cg-600)' : 'var(--text-secondary)' }} className="transition-colors" />
+                      </motion.div>
+                      {label}
+                      {isActive && (
+                        <motion.div layoutId="nav-indicator"
+                          className="ml-auto w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--cg-500)' }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        />
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              </motion.div>
+            </div>
+          )
+        })}
       </nav>
 
       {/* Dark mode toggle */}
