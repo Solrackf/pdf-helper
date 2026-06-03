@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Scissors, X, ChevronDown, Loader2, Download, Trash2, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '../components/PageHeader'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
 import { HeartProgress } from '../components/HeartProgress'
@@ -133,15 +134,7 @@ export function Extract() {
 
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <div className="flex items-center gap-3 mb-2">
-          <div style={{ background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 12px rgba(27,204,97,0.3)' }} className="flex items-center justify-center w-9 h-9 rounded-2xl">
-            <Scissors size={17} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Extraer páginas</h1>
-        </div>
-        <p style={{ color: 'var(--text-secondary)' }}>Selecciona las páginas que quieres conservar de cada documento.</p>
-      </motion.div>
+      <PageHeader icon={Scissors} title="Extraer páginas" subtitle="Selecciona las páginas que quieres conservar de cada documento." />
 
       <DropZone onFiles={handleFiles} />
 

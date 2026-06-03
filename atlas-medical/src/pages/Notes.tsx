@@ -180,11 +180,11 @@ export function Notes() {
                       {note.body || 'Sin contenido'}
                     </p>
                     <div className="flex items-center justify-between mt-2 pl-4">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                      <span className="text-[11px] px-1.5 py-0.5 rounded-md font-medium"
                         style={{ background: col.bg, color: col.dot, border: `1px solid ${col.border}` }}>
                         {note.tag}
                       </span>
-                      <span className="text-[10px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
+                      <span className="text-[11px]" style={{ color: 'var(--text-secondary)', opacity: 0.6 }}>
                         {fmt(note.updatedAt)}
                       </span>
                     </div>

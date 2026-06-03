@@ -98,7 +98,7 @@ function DesktopSidebar({ collapsed, darkMode, toggleDark }: {
           return (
             <div key={to}>
               {showSep && (
-                <p className="text-[10px] font-bold uppercase tracking-widest px-3 pt-3 pb-1"
+                <p className="text-[11px] font-bold uppercase tracking-widest px-3 pt-3 pb-1"
                   style={{ color: 'var(--text-secondary)', opacity: 0.45 }}>{group}</p>
               )}
               {collapsed && group !== null && group !== prevGroup && (
@@ -148,7 +148,7 @@ function MobileNav({ darkMode, toggleDark }: { darkMode: boolean; toggleDark: ()
             {({ isActive }) => (
               <>
                 <Icon size={20} style={{ color: isActive ? 'var(--cg-500)' : 'var(--text-secondary)' }} />
-                <span className="text-[10px] font-medium truncate max-w-[56px]">{label}</span>
+                <span className="text-[11px] font-medium truncate max-w-[56px]">{label}</span>
               </>
             )}
           </NavLink>
@@ -158,7 +158,7 @@ function MobileNav({ darkMode, toggleDark }: { darkMode: boolean; toggleDark: ()
           className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all opacity-55"
           style={{ color: 'var(--text-secondary)' }}>
           <Menu size={20} />
-          <span className="text-[10px] font-medium">Más</span>
+          <span className="text-[11px] font-medium">Más</span>
         </button>
       </nav>
 

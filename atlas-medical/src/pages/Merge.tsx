@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layers, X, GripVertical, Loader2, Download, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { PageHeader } from '../components/PageHeader'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
 import { HeartProgress } from '../components/HeartProgress'
@@ -96,15 +96,7 @@ export function Merge() {
 
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <div className="flex items-center gap-3 mb-2">
-          <div style={{ background: 'linear-gradient(135deg, #81f4ae, #1bcc61)', boxShadow: '0 4px 12px rgba(27,204,97,0.3)' }} className="flex items-center justify-center w-9 h-9 rounded-2xl">
-            <Layers size={17} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Unir documentos</h1>
-        </div>
-        <p style={{ color: 'var(--text-secondary)' }}>Combina múltiples PDFs en un único expediente. Ordénalos arrastrando.</p>
-      </motion.div>
+      <PageHeader icon={Layers} title="Unir documentos" subtitle="Combina múltiples PDFs en un único expediente. Ordénalos arrastrando." />
 
       <DropZone
         onFiles={handleFiles}

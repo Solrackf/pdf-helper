@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ScissorsLineDashed, Loader2, Download, Plus, Trash2, FileCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PageHeader } from '../components/PageHeader'
 import { DropZone } from '../components/DropZone'
 import { HeartProgress } from '../components/HeartProgress'
 import { loadPdf, extractPages, downloadBytes, formatBytes } from '../lib/pdfUtils'
@@ -66,16 +67,7 @@ export function Split() {
 
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <div className="flex items-center gap-3 mb-2">
-          <div style={{ background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 12px rgba(27,204,97,0.3)' }}
-            className="flex items-center justify-center w-9 h-9 rounded-2xl">
-            <ScissorsLineDashed size={17} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Dividir PDF</h1>
-        </div>
-        <p style={{ color: 'var(--text-secondary)' }}>Divide un PDF en múltiples partes definiendo rangos de páginas.</p>
-      </motion.div>
+      <PageHeader icon={ScissorsLineDashed} title="Dividir PDF" subtitle="Divide un PDF en múltiples partes definiendo rangos de páginas." />
 
       <DropZone onFiles={handleFile} label="Arrastra el PDF a dividir" sublabel="Un solo archivo" />
 

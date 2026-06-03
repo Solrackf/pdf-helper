@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Minimize2, X, Loader2, Download, Trash2, FileCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PageHeader } from '../components/PageHeader'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
 import { useStore } from '../store/useStore'
@@ -60,16 +61,7 @@ export function Compress() {
 
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <div className="flex items-center gap-3 mb-2">
-          <div style={{ background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 12px rgba(27,204,97,0.3)' }}
-            className="flex items-center justify-center w-9 h-9 rounded-2xl">
-            <Minimize2 size={17} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Comprimir PDF</h1>
-        </div>
-        <p style={{ color: 'var(--text-secondary)' }}>Reduce el tamaño de tus documentos sin perder información importante.</p>
-      </motion.div>
+      <PageHeader icon={Minimize2} title="Comprimir PDF" subtitle="Reduce el tamaño de tus documentos sin perder información importante." />
 
       <DropZone onFiles={handleFiles} label="Arrastra PDFs a comprimir" sublabel="Se pueden agregar múltiples archivos" />
 
