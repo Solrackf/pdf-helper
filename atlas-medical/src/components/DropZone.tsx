@@ -20,7 +20,11 @@ export function DropZone({ onFiles, label = 'Arrastra documentos PDF aquí', sub
 
   return (
     <motion.div
+      role="button"
+      tabIndex={0}
+      aria-label="Zona de carga de archivos PDF. Haz clic o arrastra un archivo."
       onClick={() => inputRef.current?.click()}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click() }}
       onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
       onDragLeave={() => setDragging(false)}
       onDrop={(e) => { e.preventDefault(); setDragging(false); handle(e.dataTransfer.files) }}
@@ -30,8 +34,9 @@ export function DropZone({ onFiles, label = 'Arrastra documentos PDF aquí', sub
         'relative flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 cursor-pointer transition-colors duration-200 select-none overflow-hidden',
         dragging
           ? 'border-[#1bcc61] bg-[#effef4] dark:bg-[#033017]/30'
-          : 'border-slate-200 dark:border-slate-700 hover:border-[#81f4ae] hover:bg-[#effef4]/60 dark:hover:bg-[#033017]/10'
+          : 'hover:border-[#81f4ae] hover:bg-[#effef4]/60 dark:hover:bg-[#033017]/10'
       )}
+      style={!dragging ? { borderColor: 'var(--border)' } : undefined}
     >
       {/* Animated background blobs on drag */}
       <AnimatePresence>
@@ -88,7 +93,7 @@ export function DropZone({ onFiles, label = 'Arrastra documentos PDF aquí', sub
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>{sublabel}</p>
       </div>
 
-      <input ref={inputRef} type="file" accept=".pdf" multiple className="hidden" onChange={(e) => handle(e.target.files)} />
+      <input ref={inputRef} type="file" accept=".pdf" multiple className="hidden" aria-label="Seleccionar archivos PDF" onChange={(e) => handle(e.target.files)} />
     </motion.div>
   )
 }

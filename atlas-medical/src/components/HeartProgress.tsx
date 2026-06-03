@@ -11,7 +11,7 @@ export function HeartProgress({ progress, label = 'Procesando...', sublabel, sho
   const done = progress >= 100
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={done ? 'Completado' : label}>
       <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
         <div className="flex items-center gap-2">
           <AnimatePresence mode="wait">
@@ -24,7 +24,7 @@ export function HeartProgress({ progress, label = 'Procesando...', sublabel, sho
               <motion.span key="beat"
                 animate={{ scale: [1, 1.4, 1, 1.2, 1] }}
                 transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.4 }}
-                className="text-sm">🩷</motion.span>
+                className="text-sm">💚</motion.span>
             ) : null}
           </AnimatePresence>
           <span>{done ? '¡Listo! 💚' : label}</span>
