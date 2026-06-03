@@ -28,11 +28,11 @@ export function Layout() {
       {/* ── Background orbs (intensidad controlada por --orb-opacity) ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="orb absolute w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle, #43e583, transparent)', top: '-180px', left: '3%', filter: 'blur(100px)', opacity: 'var(--orb-opacity)' }} />
+          style={{ background: 'radial-gradient(circle, #43e583, transparent)', top: '-180px', left: '3%', filter: 'blur(100px)', opacity: 'var(--orb-opacity)', willChange: 'transform' }} />
         <div className="orb2 absolute w-[550px] h-[550px] rounded-full"
-          style={{ background: 'radial-gradient(circle, #1bcc61, transparent)', bottom: '-120px', right: '2%', filter: 'blur(90px)', opacity: 'var(--orb-opacity)' }} />
+          style={{ background: 'radial-gradient(circle, #1bcc61, transparent)', bottom: '-120px', right: '2%', filter: 'blur(90px)', opacity: 'var(--orb-opacity)', willChange: 'transform' }} />
         <div className="orb absolute w-[400px] h-[400px] rounded-full"
-          style={{ background: 'radial-gradient(circle, #81f4ae, transparent)', top: '40%', right: '15%', filter: 'blur(80px)', opacity: 'calc(var(--orb-opacity) * 0.7)', animationDelay: '5s' }} />
+          style={{ background: 'radial-gradient(circle, #81f4ae, transparent)', top: '40%', right: '15%', filter: 'blur(80px)', opacity: 'calc(var(--orb-opacity) * 0.7)', animationDelay: '5s', willChange: 'transform' }} />
       </div>
 
       {/* ── Global floating hearts — hecho para ella 💚 ── */}
@@ -53,7 +53,7 @@ export function Layout() {
 
       <Sidebar />
 
-      <main className="flex-1 md:ml-64 min-h-screen relative z-10 pb-20 md:pb-0">
+      <main id="main-content" aria-label="Contenido principal" className="flex-1 md:ml-16 lg:ml-64 min-h-screen relative z-10 pb-20 md:pb-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

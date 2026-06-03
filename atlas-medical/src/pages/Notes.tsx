@@ -171,7 +171,8 @@ export function Notes() {
                       </div>
                       <button
                         onClick={e => { e.stopPropagation(); deleteNote(note.id) }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:text-red-500 transition-all shrink-0"
+                        aria-label={`Eliminar nota "${note.title}"`}
+                        className="opacity-40 group-hover:opacity-100 p-1 rounded-lg hover:text-red-500 transition-all shrink-0"
                         style={{ color: 'var(--text-secondary)' }}
                       ><Trash2 size={12} /></button>
                     </div>

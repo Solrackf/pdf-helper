@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# 💚 Morita PDF Helper
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Herramienta de productividad para gestión de documentos PDF — hecha con amor para Morita.
 
-Currently, two official plugins are available:
+**Live:** [solrackf.github.io/pdf-helper](https://solrackf.github.io/pdf-helper/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Módulo | Descripción |
+|---|---|
+| **Extraer páginas** | Selecciona páginas visualmente con miniaturas y descárgalas como PDF |
+| **Unir documentos** | Combina múltiples PDFs con drag & drop para reordenar |
+| **Dividir PDF** | Parte un PDF en secciones con rangos personalizados o división rápida |
+| **Comprimir PDF** | Reduce el tamaño manteniendo la calidad |
+| **PDF a imágenes** | Exporta cada página como PNG o JPG en hasta 3× de resolución |
+| **Notas** | Bloc de apuntes con etiquetas, colores y búsqueda — persistido localmente |
 
-## Expanding the ESLint configuration
+## 🔒 Privacidad
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Todo el procesamiento ocurre en tu dispositivo.** Ningún archivo sale de tu navegador — no hay servidor, no hay uploads.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠 Stack técnico
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **React 19** + **TypeScript**
+- **Vite 8** con `@tailwindcss/vite`
+- **Tailwind CSS v4**
+- **Framer Motion** — animaciones y transiciones
+- **Zustand** — estado global con persistencia en `localStorage`
+- **React Router v7**
+- **pdfjs-dist** — renderizado de páginas PDF
+- **pdf-lib** — manipulación y generación de PDFs
+- **lucide-react** — iconografía
+- **vite-plugin-pwa** — instalable como PWA
+
+---
+
+## 🎨 Diseño
+
+- Paleta **Chateau Green** (50–950) como único sistema de color
+- **Glassmorphism** con `backdrop-filter` en sidebar y cards
+- Modo **claro** y **oscuro** con tokens semánticos CSS (`--bg-page`, `--text-primary`, etc.)
+- Responsive: **bottom nav** en móvil, sidebar icon-only en tablet, sidebar completo en desktop
+- Corazones flotantes animados en el fondo 💚
+
+---
+
+## 🚀 Desarrollo local
+
+```bash
+cd atlas-medical
+npm install
+npm run dev
+# → http://localhost:5173/pdf-helper/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📦 Deploy
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run deploy
+# Build + push automático a rama gh-pages
 ```
+
+---
+
+*Hecho con 💚 para Morita*

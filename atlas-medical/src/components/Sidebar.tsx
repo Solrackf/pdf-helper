@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Home, Scissors, Layers, Moon, Sun, Heart, Minimize2, ImageDown, ScissorsLineDashed, StickyNote, Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -52,6 +52,15 @@ function NavItem({ to, icon: Icon, label, collapsed, onClick }: {
   )
 }
 
+/* ── useMediaQuery hook ── */
+function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (cb) => { const mql = window.matchMedia(query); mql.addEventListener('change', cb); return () => mql.removeEventListener('change', cb) },
+    () => window.matchMedia(query).matches,
+    () => false
+  )
+}
+
 /* ── Desktop sidebar (≥ 1024px full, 768-1024 icon-only) ── */
 function DesktopSidebar({ collapsed, darkMode, toggleDark }: {
   collapsed: boolean; darkMode: boolean; toggleDark: () => void
@@ -61,6 +70,7 @@ function DesktopSidebar({ collapsed, darkMode, toggleDark }: {
       initial={{ x: -80, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
+      aria-label="Navegación principal"
       className={clsx('fixed left-0 top-0 h-screen flex flex-col glass-sidebar z-40 transition-all duration-300', collapsed ? 'w-16' : 'w-64')}
     >
       {/* Logo */}
@@ -106,6 +116,7 @@ function DesktopSidebar({ collapsed, darkMode, toggleDark }: {
           className={clsx('flex items-center gap-3 w-full rounded-xl text-sm font-medium transition-colors opacity-75 hover:opacity-100',
             collapsed ? 'justify-center p-2.5' : 'px-3 py-2.5')}
           style={{ color: 'var(--text-secondary)' }}
+          aria-label={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           title={collapsed ? (darkMode ? 'Modo claro' : 'Modo oscuro') : undefined}>
           <motion.div key={darkMode ? 'sun' : 'moon'} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ duration: 0.25 }}>
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -224,11 +235,12 @@ function MobileNav({ darkMode, toggleDark }: { darkMode: boolean; toggleDark: ()
 /* ── Main export ── */
 export function Sidebar() {
   const { darkMode, toggleDark } = useStore()
+  const isLg = useMediaQuery('(min-width: 1024px)')
   return (
     <>
-      {/* Desktop: show sidebar (full on lg+, icon-only on md) */}
+      {/* Desktop: full sidebar on lg+, icon-only on md */}
       <div className="hidden md:block">
-        <DesktopSidebar collapsed={false} darkMode={darkMode} toggleDark={toggleDark} />
+        <DesktopSidebar collapsed={!isLg} darkMode={darkMode} toggleDark={toggleDark} />
       </div>
       {/* Mobile: bottom nav + drawer */}
       <div className="md:hidden">

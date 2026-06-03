@@ -66,15 +66,15 @@ export function Compress() {
             className="flex items-center justify-center w-9 h-9 rounded-2xl">
             <Minimize2 size={17} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-[#0a2e1a] dark:text-[#e8faf0]">Comprimir PDF</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Comprimir PDF</h1>
         </div>
-        <p className="text-[#10853f] dark:text-[#81f4ae]">Reduce el tamaño de tus documentos sin perder información importante.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Reduce el tamaño de tus documentos sin perder información importante.</p>
       </motion.div>
 
       <DropZone onFiles={handleFiles} label="Arrastra PDFs a comprimir" sublabel="Se pueden agregar múltiples archivos" />
 
       {loading && (
-        <div className="flex items-center gap-3 text-[#10853f] dark:text-[#81f4ae] text-sm">
+        <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
           <Loader2 size={16} className="animate-spin" /> Analizando documento...
         </div>
       )}
@@ -85,12 +85,12 @@ export function Compress() {
             <span className="text-sm font-semibold" style={{ color: 'var(--cg-700)' }}>
               {mergeFiles.length} documento(s) · {formatBytes(mergeFiles.reduce((a, f) => a + f.size, 0))} total
             </span>
-            <button onClick={clearMergeFiles} className="flex items-center gap-1.5 text-xs text-[#10853f] hover:text-red-500 transition-colors">
+            <button onClick={clearMergeFiles} className="flex items-center gap-1.5 text-xs hover:text-red-500 transition-colors" style={{ color: 'var(--text-secondary)' }}>
               <Trash2 size={13} /> Limpiar todo
             </button>
           </div>
 
-          <div className="rounded-2xl glass-card overflow-hidden divide-y divide-[#b8fad1]/30 dark:divide-[#10853f]/20">
+          <div className="rounded-2xl glass-card overflow-hidden divide-y" style={{ borderColor: 'var(--border)' }}>
             <AnimatePresence>
               {mergeFiles.map((file, i) => (
                 <motion.div
@@ -106,11 +106,11 @@ export function Compress() {
                     <FileCheck size={15} style={{ color: 'var(--cg-600)' }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-sm text-[#0a2e1a] dark:text-[#e8faf0]">{file.name}</p>
-                    <p className="text-xs text-[#10853f] dark:text-[#81f4ae]">{file.totalPages} páginas · {formatBytes(file.size)}</p>
+                    <p className="font-medium truncate text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{file.totalPages} páginas · {formatBytes(file.size)}</p>
                   </div>
                   <button onClick={() => removeMergeFile(file.id)}
-                    className="p-1.5 rounded-lg text-[#81f4ae] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                    className="p-1.5 rounded-lg hover:text-red-500 transition-colors" style={{ color: 'var(--text-secondary)' }}>
                     <X size={15} />
                   </button>
                 </motion.div>
@@ -136,17 +136,17 @@ export function Compress() {
                   onClick={() => setLevel(id)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  style={level === id ? { background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 12px rgba(27,204,97,0.35)' } : {}}
+                  style={level === id
+                    ? { background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 12px rgba(27,204,97,0.35)' }
+                    : { borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
                   className={clsx(
                     'flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-sm font-medium border transition-all',
-                    level === id
-                      ? 'text-white border-[#1bcc61]'
-                      : 'border-[#b8fad1] dark:border-[#10853f]/40 text-[#126936] dark:text-[#81f4ae] hover:border-[#43e583]'
+                    level === id ? 'text-white border-[#1bcc61]' : 'hover:border-[#43e583]'
                   )}
                 >
                   <span className="text-lg">{emoji}</span>
                   <span>{label}</span>
-                  <span className={clsx('text-[10px] text-center leading-tight', level === id ? 'text-white/80' : 'text-[#10853f]/70 dark:text-[#81f4ae]/60')}>{desc}</span>
+                  <span className="text-[10px] text-center leading-tight" style={{ color: level === id ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)' }}>{desc}</span>
                 </motion.button>
               ))}
             </div>
@@ -188,9 +188,9 @@ export function Compress() {
                 <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
                   className="flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate text-[#0a2e1a] dark:text-[#e8faf0]">{r.name}</p>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{r.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-[#dbfde8] dark:bg-[#10853f]/20 overflow-hidden">
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(27,204,97,0.15)' }}>
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${100 - pct}%` }}
@@ -203,7 +203,7 @@ export function Compress() {
                     </div>
                   </div>
                   <div className="text-right text-xs shrink-0">
-                    <p className="text-[#81f4ae] line-through">{formatBytes(r.before)}</p>
+                    <p className="line-through" style={{ color: 'var(--cg-300)' }}>{formatBytes(r.before)}</p>
                     <p className="font-bold" style={{ color: 'var(--cg-600)' }}>{formatBytes(r.after)}</p>
                   </div>
                 </motion.div>
