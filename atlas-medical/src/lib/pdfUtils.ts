@@ -13,16 +13,19 @@ const PDF_LIB_OPTS = {
   updateMetadata: false,        // skip metadata rewrite → faster load
 }
 
-// ── loadPdf: use Uint8Array directly, no extra copy ──────────────────────────
+// ── loadPdf: ALWAYS copy before handing to pdfjs worker ──────────────────────
+// pdfjs may detach/transfer the underlying ArrayBuffer to its worker.
+// We copy here so the original `buffer` passed by the caller stays intact
+// and can be safely used afterwards for extractPages / renderAllThumbnails.
 export async function loadPdf(buffer: ArrayBuffer) {
-  // pdfjs only needs a view, not ownership — no slice needed here
+  const copy = buffer.slice(0)   // own copy — pdfjs can do whatever it wants with this
   const pdf = await pdfjs.getDocument({
-    data: new Uint8Array(buffer),
-    disableAutoFetch: true,    // critical for large PDFs — avoids pre-fetching all pages
+    data: new Uint8Array(copy),
+    disableAutoFetch: true,
     disableStream: false,
   }).promise
   const numPages = pdf.numPages
-  pdf.cleanup()                // free worker memory immediately after page count
+  pdf.cleanup()
   return { numPages }
 }
 
@@ -33,8 +36,9 @@ export async function renderAllThumbnails(
   scale = 0.3,
   onPage?: (num: number, src: string) => void
 ): Promise<Array<{ num: number; src: string }>> {
+  const copy = buffer.slice(0)
   const pdf = await pdfjs.getDocument({
-    data: new Uint8Array(buffer),
+    data: new Uint8Array(copy),
     disableAutoFetch: true,
     disableStream: false,
   }).promise
@@ -72,8 +76,9 @@ export async function renderPageFull(
   scale = 2.0,
   format: 'png' | 'jpg' = 'png'
 ): Promise<string> {
+  const copy = buffer.slice(0)
   const pdf = await pdfjs.getDocument({
-    data: new Uint8Array(buffer),
+    data: new Uint8Array(copy),
     disableAutoFetch: true,
     disableStream: false,
   }).promise
