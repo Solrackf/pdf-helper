@@ -19,7 +19,7 @@ export function Layout() {
 
       <Sidebar />
 
-      <main className="flex-1 ml-64 min-h-screen relative z-10">
+      <main className="flex-1 md:ml-64 min-h-screen relative z-10 pb-20 md:pb-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -27,7 +27,7 @@ export function Layout() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
-            className="max-w-4xl mx-auto px-8 py-10"
+            className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10"
           >
             <Outlet />
           </motion.div>

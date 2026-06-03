@@ -105,11 +105,11 @@ export function Notes() {
         </div>
       </motion.div>
 
-      <div className="flex gap-5 h-[calc(100vh-220px)] min-h-[400px]">
+      <div className="flex flex-col md:flex-row gap-5 md:h-[calc(100vh-220px)] min-h-[400px]">
         {/* ── Lista ── */}
         <motion.div
           initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35 }}
-          className="w-72 shrink-0 flex flex-col gap-3"
+          className="w-full md:w-72 shrink-0 flex flex-col gap-3"
         >
           {/* Búsqueda */}
           <div className="relative">
@@ -141,7 +141,7 @@ export function Notes() {
           </div>
 
           {/* Note list */}
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-64 md:max-h-none">
             <AnimatePresence>
               {filtered.length === 0 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
