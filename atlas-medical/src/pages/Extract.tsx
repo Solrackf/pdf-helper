@@ -34,6 +34,7 @@ export function Extract() {
   const [selectedPages, setSelectedPages] = useState<Record<string, Set<number>>>({})
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
+  const [rangeInputs, setRangeInputs] = useState<Record<string, string>>({})
 
   useEffect(() => {
     extractFiles.forEach((f) => {
@@ -41,6 +42,7 @@ export function Extract() {
         const all = Array.from({ length: f.totalPages }, (_, i) => i + 1)
         setSelectedPages((p) => ({ ...p, [f.id]: new Set(all) }))
         updatePageRange(f.id, `1-${f.totalPages}`)
+        setRangeInputs((r) => ({ ...r, [f.id]: `1-${f.totalPages}` }))
       }
     })
   }, [extractFiles])
@@ -100,21 +102,30 @@ export function Extract() {
       const set = new Set(prev[fileId] ?? [])
       set.has(page) ? set.delete(page) : set.add(page)
       const sorted = [...set].sort((a, b) => a - b)
-      updatePageRange(fileId, sorted.join(', '))
+      const rangeStr = sorted.join(', ')
+      updatePageRange(fileId, rangeStr)
+      setRangeInputs((r) => ({ ...r, [fileId]: rangeStr }))
       return { ...prev, [fileId]: set }
     })
   }
 
   const selectAll = (fileId: string, total: number) => {
     const all = new Set(Array.from({ length: total }, (_, i) => i + 1))
-    const sorted = [...all].join(', ')
-    updatePageRange(fileId, sorted)
+    updatePageRange(fileId, `1-${total}`)
+    setRangeInputs((r) => ({ ...r, [fileId]: `1-${total}` }))
     setSelectedPages((p) => ({ ...p, [fileId]: all }))
   }
 
   const selectNone = (fileId: string) => {
     updatePageRange(fileId, '')
+    setRangeInputs((r) => ({ ...r, [fileId]: '' }))
     setSelectedPages((p) => ({ ...p, [fileId]: new Set() }))
+  }
+
+  const applyRangeInput = (fileId: string, totalPages: number, value: string) => {
+    const pages = parsePageRanges(value, totalPages)
+    updatePageRange(fileId, value)
+    setSelectedPages((p) => ({ ...p, [fileId]: new Set(pages) }))
   }
 
   const handleProcess = async () => {
@@ -174,7 +185,21 @@ export function Extract() {
                 <div className="flex items-center gap-4 p-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{file.totalPages} páginas · {formatBytes(file.size)} · {sel.size} seleccionadas</p>
+                    <p className="text-xs mt-0.5 mb-2" style={{ color: 'var(--text-secondary)' }}>{file.totalPages} págs · {formatBytes(file.size)} · {sel.size} seleccionadas</p>
+                    <input
+                      type="text"
+                      value={rangeInputs[file.id] ?? file.pagesToExtract}
+                      onChange={(e) => setRangeInputs((r) => ({ ...r, [file.id]: e.target.value }))}
+                      onBlur={(e) => applyRangeInput(file.id, file.totalPages, e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && applyRangeInput(file.id, file.totalPages, rangeInputs[file.id] ?? '')}
+                      placeholder="ej. 1-5, 8, 11-13"
+                      className="w-full text-xs px-2.5 py-1.5 rounded-lg border outline-none"
+                      style={{
+                        background: 'var(--surface)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-primary)',
+                      }}
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -192,11 +217,31 @@ export function Extract() {
 
                 {isExpanded && (
                   <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs hover:underline" style={{ color: 'var(--cg-500)' }}>Todas</button>
-                      <button onClick={() => selectNone(file.id)} className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>Ninguna</button>
-                      <span className="text-xs" style={{ color: 'var(--border)' }}>·</span>
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Toca las miniaturas para seleccionar</span>
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={rangeInputs[file.id] ?? file.pagesToExtract}
+                          onChange={(e) => setRangeInputs((r) => ({ ...r, [file.id]: e.target.value }))}
+                          onBlur={(e) => applyRangeInput(file.id, file.totalPages, e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && applyRangeInput(file.id, file.totalPages, rangeInputs[file.id] ?? '')}
+                          placeholder={`ej. 1-5, 8, 11-13`}
+                          className="flex-1 text-sm px-3 py-1.5 rounded-lg border outline-none transition-all"
+                          style={{
+                            background: 'var(--surface)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--text-primary)',
+                          }}
+                        />
+                        <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
+                          {(selectedPages[file.id]?.size ?? 0)} / {file.totalPages} págs
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs hover:underline" style={{ color: 'var(--cg-500)' }}>Todas</button>
+                        <button onClick={() => selectNone(file.id)} className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>Ninguna</button>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>· Toca miniaturas o escribe rangos arriba</span>
+                      </div>
                     </div>
 
                     {!thumbs ? (
