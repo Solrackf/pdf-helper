@@ -93,7 +93,7 @@ export function DropZone({ onFiles, label = 'Arrastra documentos PDF aquí', sub
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>{sublabel}</p>
       </div>
 
-      <input ref={inputRef} type="file" accept=".pdf" multiple className="hidden" aria-label="Seleccionar archivos PDF" onChange={(e) => handle(e.target.files)} />
+      <input ref={inputRef} type="file" accept=".pdf" multiple className="hidden" aria-label="Seleccionar archivos PDF" onChange={(e) => { handle(e.target.files); e.target.value = '' }} />
     </motion.div>
   )
 }

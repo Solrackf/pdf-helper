@@ -17,7 +17,7 @@ const levels: { id: Level; label: string; desc: string; emoji: string }[] = [
 ]
 
 export function Compress() {
-  const { mergeFiles, addMergeFile, removeMergeFile, clearMergeFiles } = useStore()
+  const { compressFiles, addCompressFile, removeCompressFile, clearCompressFiles } = useStore()
   const { toast } = useToast()
   const [loading, setLoading]       = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -30,7 +30,7 @@ export function Compress() {
       try {
         const data = await file.arrayBuffer()
         const { numPages } = await loadPdf(data)
-        addMergeFile({ id: generateId(), name: file.name, size: file.size, totalPages: numPages, pagesToExtract: '', data, addedAt: Date.now() })
+        addCompressFile({ id: generateId(), name: file.name, size: file.size, totalPages: numPages, pagesToExtract: '', data, addedAt: Date.now() })
       } catch {
         toast(`No se pudo leer ${file.name}`, 'error')
       }
@@ -39,11 +39,11 @@ export function Compress() {
   }
 
   const handleCompress = async () => {
-    if (mergeFiles.length === 0) return
+    if (compressFiles.length === 0) return
     setProcessing(true)
     setResults([])
     const newResults: { name: string; before: number; after: number }[] = []
-    for (const file of mergeFiles) {
+    for (const file of compressFiles) {
       try {
         const bytes = await mergeDocuments([file.data], level)
         downloadBytes(bytes, file.name.replace('.pdf', '_comprimido.pdf'))
@@ -71,20 +71,20 @@ export function Compress() {
         </div>
       )}
 
-      {mergeFiles.length > 0 && (
+      {compressFiles.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold" style={{ color: 'var(--cg-700)' }}>
-              {mergeFiles.length} documento(s) · {formatBytes(mergeFiles.reduce((a, f) => a + f.size, 0))} total
+              {compressFiles.length} documento(s) · {formatBytes(compressFiles.reduce((a, f) => a + f.size, 0))} total
             </span>
-            <button onClick={clearMergeFiles} className="flex items-center gap-1.5 text-xs hover:text-red-500 transition-colors" style={{ color: 'var(--text-secondary)' }}>
+            <button onClick={clearCompressFiles} className="flex items-center gap-1.5 text-xs hover:text-red-500 transition-colors" style={{ color: 'var(--text-secondary)' }}>
               <Trash2 size={13} /> Limpiar todo
             </button>
           </div>
 
           <div className="rounded-2xl glass-card overflow-hidden divide-y" style={{ borderColor: 'var(--border)' }}>
             <AnimatePresence>
-              {mergeFiles.map((file, i) => (
+              {compressFiles.map((file, i) => (
                 <motion.div
                   key={file.id}
                   initial={{ opacity: 0, x: -16 }}
@@ -101,7 +101,7 @@ export function Compress() {
                     <p className="font-medium truncate text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
                     <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{file.totalPages} páginas · {formatBytes(file.size)}</p>
                   </div>
-                  <button onClick={() => removeMergeFile(file.id)}
+                  <button onClick={() => removeCompressFile(file.id)}
                     className="p-1.5 rounded-lg hover:text-red-500 transition-colors" style={{ color: 'var(--text-secondary)' }}>
                     <X size={15} />
                   </button>
@@ -112,7 +112,7 @@ export function Compress() {
         </motion.div>
       )}
 
-      {mergeFiles.length > 0 && (
+      {compressFiles.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="rounded-2xl glass-card p-5 space-y-5">
 

@@ -26,6 +26,11 @@ interface AppState {
   removeMergeFile: (id: string) => void
   reorderMergeFiles: (files: PdfFile[]) => void
   clearMergeFiles: () => void
+
+  compressFiles: PdfFile[]
+  addCompressFile: (file: PdfFile) => void
+  removeCompressFile: (id: string) => void
+  clearCompressFiles: () => void
 }
 
 export const useStore = create<AppState>()(
@@ -59,6 +64,13 @@ export const useStore = create<AppState>()(
         set((s) => ({ mergeFiles: s.mergeFiles.filter((f) => f.id !== id) })),
       reorderMergeFiles: (files) => set({ mergeFiles: files }),
       clearMergeFiles: () => set({ mergeFiles: [] }),
+
+      compressFiles: [],
+      addCompressFile: (file) =>
+        set((s) => ({ compressFiles: [...s.compressFiles, file] })),
+      removeCompressFile: (id) =>
+        set((s) => ({ compressFiles: s.compressFiles.filter((f) => f.id !== id) })),
+      clearCompressFiles: () => set({ compressFiles: [] }),
     }),
     {
       name: 'atlas-settings',

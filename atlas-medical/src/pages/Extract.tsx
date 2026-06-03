@@ -45,7 +45,7 @@ export function Extract() {
         setRangeInputs((r) => ({ ...r, [f.id]: `1-${f.totalPages}` }))
       }
     })
-  }, [extractFiles])
+  }, [extractFiles, updatePageRange])
 
   const handleFiles = async (files: File[]) => {
     setLoading(true)

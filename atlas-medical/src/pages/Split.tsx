@@ -188,7 +188,7 @@ export function Split() {
             </div>
 
             {processing && (
-              <HeartProgress progress={progress} label={`Dividiendo parte ${Math.ceil(ranges.length * progress / 100)} de ${ranges.length}...`} />
+              <HeartProgress progress={progress} label={`Dividiendo parte ${Math.min(ranges.length, Math.ceil(ranges.length * progress / 100) || 1)} de ${ranges.length}...`} />
             )}
 
             <motion.button

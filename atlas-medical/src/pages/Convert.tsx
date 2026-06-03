@@ -16,23 +16,24 @@ export function Convert() {
   const [file, setFile]           = useState<ConvFile | null>(null)
   const [format, setFormat]       = useState<Format>('png')
   const [scale, setScale]         = useState<Scale>('2')
-  const [loading, setLoading]     = useState(false)
+  const [reading, setReading]     = useState(false)
+  const [converting, setConverting] = useState(false)
   const [progress, setProgress]   = useState(0)
   const [done, setDone]           = useState(false)
 
   const handleFile = async (files: File[]) => {
     const f = files[0]
     if (!f) return
-    setLoading(true); setDone(false); setProgress(0)
+    setReading(true); setDone(false); setProgress(0)
     const data = await f.arrayBuffer()
     const { numPages } = await loadPdf(data)
     setFile({ name: f.name, size: f.size, pages: numPages, data })
-    setLoading(false)
+    setReading(false)
   }
 
   const handleConvert = async () => {
     if (!file) return
-    setLoading(true); setProgress(0); setDone(false)
+    setConverting(true); setProgress(0); setDone(false)
     const sc = parseFloat(scale)
     for (let i = 1; i <= file.pages; i++) {
       const dataUrl = await renderPageFull(file.data, i, sc, format)
@@ -42,7 +43,7 @@ export function Convert() {
       document.body.appendChild(a); a.click(); document.body.removeChild(a)
       setProgress(Math.round((i / file.pages) * 100))
     }
-    setLoading(false); setDone(true)
+    setConverting(false); setDone(true)
   }
 
   const scales: { id: Scale; label: string; desc: string }[] = [
@@ -57,7 +58,7 @@ export function Convert() {
 
       <DropZone onFiles={handleFile} label="Arrastra el PDF a convertir" sublabel="Solo se procesa un archivo a la vez" />
 
-      {loading && !file && (
+      {reading && (
         <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
           <Loader2 size={16} className="animate-spin" /> Leyendo documento...
         </div>
@@ -122,7 +123,7 @@ export function Convert() {
               </div>
             </div>
 
-            {loading && (
+            {converting && (
               <HeartProgress
                 progress={progress}
                 label={`Convirtiendo página ${Math.max(1, Math.ceil(file.pages * progress / 100))} de ${file.pages}...`}
@@ -145,13 +146,13 @@ export function Convert() {
 
             <motion.button
               onClick={handleConvert}
-              disabled={loading}
+              disabled={converting}
               whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
               style={{ background: 'linear-gradient(135deg,#43e583,#0fa34a)', boxShadow: '0 4px 16px rgba(27,204,97,0.35)' }}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold disabled:opacity-40 transition-all"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-              {loading ? 'Convirtiendo...' : `Convertir ${file.pages} página${file.pages !== 1 ? 's' : ''} a ${format.toUpperCase()}`}
+              {converting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              {converting ? 'Convirtiendo...' : `Convertir ${file.pages} página${file.pages !== 1 ? 's' : ''} a ${format.toUpperCase()}`}
             </motion.button>
           </motion.div>
         )}
