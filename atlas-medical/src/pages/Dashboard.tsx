@@ -138,10 +138,10 @@ export function Dashboard() {
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.4 }}
-            className="mt-2 text-sm"
-            style={{ color: darkMode ? 'var(--cg-400)' : 'rgba(255,255,255,0.72)' }}
+            className="mt-2 text-sm leading-relaxed"
+            style={{ color: darkMode ? 'var(--cg-400)' : 'rgba(255,255,255,0.9)', textShadow: darkMode ? 'none' : '0 1px 3px rgba(0,0,0,0.18)' }}
           >
-            Atlas Morita Toolkit · Procesamiento 100% local ❤️
+            Morita Toolkit · Procesamiento 100% local ❤️
           </motion.p>
         </div>
 

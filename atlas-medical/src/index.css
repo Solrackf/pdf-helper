@@ -25,8 +25,8 @@
   /* semantic — light mode */
   --bg-page:        #effef4;
   --text-primary:   #033017;
-  --text-secondary: #10853f;
-  --text-muted:     #126936;
+  --text-secondary: #0a6b30;
+  --text-muted:     #0d5a29;
   --surface:        rgba(255,255,255,0.78);
   --surface-muted:  rgba(239,254,244,0.85);
   --border:         rgba(129,244,174,0.45);
@@ -70,6 +70,13 @@ body {
   display: flex;
   width: 100%;
   position: relative;
+}
+
+/* ── Focus visible global ──────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--cg-500);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -193,4 +200,18 @@ body.dark .glass-sidebar {
 body.dark .skeleton {
   background: linear-gradient(90deg, #11562e 25%, #10853f 50%, #11562e 75%);
   background-size: 200% 100%;
+}
+
+/* ── Reduced motion (accesibilidad médica) ──────────────── */
+/* Solo afecta a usuarios que lo activaron en su SO.        */
+/* El resto de usuarios ve todas las animaciones completas. */
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb2           { animation: none; }
+  .heart-rise           { animation: none; opacity: 0.06; }
+  .pulse-glow           { animation: none; }
+  .heartbeat            { animation: none; }
+  .float-heart          { animation: none; }
+  .progress-bar         { animation: none; background: var(--cg-500); }
+  .animate-fade-in      { animation: none; opacity: 1; }
+  .skeleton             { animation: none; }
 }

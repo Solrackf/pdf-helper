@@ -74,8 +74,8 @@ function DesktopSidebar({ collapsed, darkMode, toggleDark }: {
         </motion.div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <p className="font-bold text-sm leading-none" style={{ color: 'var(--text-primary)' }}>Atlas</p>
-            <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--cg-500)' }}>Morita Toolkit</p>
+            <p className="font-bold text-sm leading-none" style={{ color: 'var(--text-primary)' }}>Morita</p>
+            <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--cg-500)' }}>Morita PDF Helper</p>
           </div>
         )}
       </div>
@@ -175,7 +175,7 @@ function MobileNav({ darkMode, toggleDark }: { darkMode: boolean; toggleDark: ()
                     className="w-8 h-8 rounded-xl flex items-center justify-center">
                     <Heart size={14} className="text-white" fill="white" />
                   </div>
-                  <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Atlas Morita</span>
+                  <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Morita</span>
                 </div>
                 <button onClick={() => setOpen(false)} className="p-1.5 rounded-xl" style={{ color: 'var(--text-secondary)' }}>
                   <X size={18} />
