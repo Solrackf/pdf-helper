@@ -9,7 +9,7 @@ import { useStore } from '../store/useStore'
 import { useToast } from '../context/ToastContext'
 import {
   loadPdf,
-  renderPageThumbnail,
+  renderAllThumbnails,
   parsePageRanges,
   extractPages,
   downloadBytes,
@@ -71,14 +71,22 @@ export function Extract() {
     if (thumbsMap[fileId]) return
     const file = extractFiles.find((f) => f.id === fileId)
     if (!file) return
-    const thumbs: PageThumb[] = []
-    for (let i = 1; i <= Math.min(file.totalPages, 20); i++) {
-      try {
-        const src = await renderPageThumbnail(file.data, i, 0.25)
-        thumbs.push({ num: i, src })
-      } catch { thumbs.push({ num: i, src: '' }) }
-    }
-    setThumbsMap((m) => ({ ...m, [fileId]: thumbs }))
+    // start with empty placeholders so the grid appears immediately
+    setThumbsMap((m) => ({
+      ...m,
+      [fileId]: Array.from({ length: Math.min(file.totalPages, 20) }, (_, i) => ({ num: i + 1, src: '' }))
+    }))
+    await renderAllThumbnails(
+      file.data,
+      20,
+      0.25,
+      (num, src) => {
+        setThumbsMap((m) => ({
+          ...m,
+          [fileId]: (m[fileId] ?? []).map((t) => t.num === num ? { num, src } : t)
+        }))
+      }
+    )
   }
 
   const toggleExpand = (id: string) => {
@@ -183,12 +191,12 @@ export function Extract() {
                 </div>
 
                 {isExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-800 p-4">
+                  <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
                     <div className="flex items-center gap-3 mb-4">
-                      <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs text-blue-500 hover:underline">Todas</button>
-                      <button onClick={() => selectNone(file.id)} className="text-xs text-slate-400 hover:underline">Ninguna</button>
-                      <span className="text-xs text-slate-300 dark:text-slate-600">·</span>
-                      <span className="text-xs text-slate-400">Haz clic en las miniaturas para seleccionar</span>
+                      <button onClick={() => selectAll(file.id, file.totalPages)} className="text-xs hover:underline" style={{ color: 'var(--cg-500)' }}>Todas</button>
+                      <button onClick={() => selectNone(file.id)} className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>Ninguna</button>
+                      <span className="text-xs" style={{ color: 'var(--border)' }}>·</span>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Toca las miniaturas para seleccionar</span>
                     </div>
 
                     {!thumbs ? (
@@ -203,15 +211,16 @@ export function Extract() {
                           <button
                             key={num}
                             onClick={() => togglePage(file.id, num)}
+                            style={sel.has(num) ? { borderColor: '#1bcc61' } : { borderColor: 'transparent' }}
                             className={clsx(
-                              'relative rounded-lg overflow-hidden border-2 transition-all aspect-[3/4] bg-slate-100 dark:bg-slate-800',
+                              'relative rounded-lg overflow-hidden border-2 transition-all aspect-[3/4]',
                               sel.has(num)
-                                ? 'scale-[1.03]'
-                                : 'border-transparent opacity-50 hover:opacity-80'
+                                ? 'scale-[1.03] bg-[#effef4]'
+                                : 'opacity-50 hover:opacity-80 bg-[rgba(129,244,174,0.08)]'
                             )}
                           >
                             {src ? <img src={src} alt={`Pág ${num}`} className="w-full h-full object-cover" /> : (
-                              <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">{num}</div>
+                              <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'var(--text-muted)' }}>{num}</div>
                             )}
                             {sel.has(num) && (
                               <motion.div
@@ -228,7 +237,7 @@ export function Extract() {
                           </button>
                         ))}
                         {file.totalPages > 20 && (
-                          <div className="aspect-[3/4] rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs text-slate-400">
+                          <div className="aspect-[3/4] rounded-lg flex items-center justify-center text-xs" style={{ background: 'var(--surface)', color: 'var(--text-muted)' }}>
                             +{file.totalPages - 20} más
                           </div>
                         )}

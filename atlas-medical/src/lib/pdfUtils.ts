@@ -8,7 +8,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export async function loadPdf(buffer: ArrayBuffer) {
   const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: copy }).promise
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
   return { numPages: pdf.numPages }
 }
 
@@ -19,7 +19,7 @@ export async function renderPageFull(
   format: 'png' | 'jpg' = 'png'
 ): Promise<string> {
   const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: copy }).promise
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
   const page = await pdf.getPage(pageNum)
   const viewport = page.getViewport({ scale })
   const canvas = document.createElement('canvas')
@@ -38,7 +38,7 @@ export async function renderPageThumbnail(
   scale = 0.3
 ): Promise<string> {
   const copy = buffer.slice(0)
-  const pdf = await pdfjs.getDocument({ data: copy }).promise
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
   const page = await pdf.getPage(pageNum)
   const viewport = page.getViewport({ scale })
   const canvas = document.createElement('canvas')
@@ -47,6 +47,37 @@ export async function renderPageThumbnail(
   const ctx = canvas.getContext('2d')!
   await page.render({ canvasContext: ctx, viewport, canvas }).promise
   return canvas.toDataURL('image/jpeg', 0.7)
+}
+
+export async function renderAllThumbnails(
+  buffer: ArrayBuffer,
+  maxPages: number,
+  scale = 0.3,
+  onPage?: (num: number, src: string) => void
+): Promise<Array<{ num: number; src: string }>> {
+  const copy = buffer.slice(0)
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(copy) }).promise
+  const total = Math.min(pdf.numPages, maxPages)
+  const results: Array<{ num: number; src: string }> = []
+
+  for (let i = 1; i <= total; i++) {
+    try {
+      const page = await pdf.getPage(i)
+      const viewport = page.getViewport({ scale })
+      const canvas = document.createElement('canvas')
+      canvas.width = viewport.width
+      canvas.height = viewport.height
+      const ctx = canvas.getContext('2d')!
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise
+      const src = canvas.toDataURL('image/jpeg', 0.7)
+      results.push({ num: i, src })
+      onPage?.(i, src)
+      page.cleanup()
+    } catch {
+      results.push({ num: i, src: '' })
+    }
+  }
+  return results
 }
 
 export function parsePageRanges(rangeStr: string, totalPages: number): number[] {
