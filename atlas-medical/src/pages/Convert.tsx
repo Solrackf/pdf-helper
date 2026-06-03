@@ -3,6 +3,7 @@ import { ImageDown, Loader2, Download, FileImage, CheckCircle2 } from 'lucide-re
 import { motion, AnimatePresence } from 'framer-motion'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
+import { HeartProgress } from '../components/HeartProgress'
 import { loadPdf, renderPageFull, formatBytes } from '../lib/pdfUtils'
 
 type Format = 'png' | 'jpg'
@@ -129,18 +130,11 @@ export function Convert() {
               </div>
             </div>
 
-            {/* Progress */}
             {loading && (
-              <div>
-                <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                  <span>Convirtiendo página {Math.ceil(file.pages * progress / 100)} de {file.pages}...</span>
-                  <span>{progress}%</span>
-                </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(27,204,97,0.15)' }}>
-                  <motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }}
-                    className="h-2 rounded-full" style={{ background: 'linear-gradient(90deg,#43e583,#0fa34a)' }} />
-                </div>
-              </div>
+              <HeartProgress
+                progress={progress}
+                label={`Convirtiendo página ${Math.max(1, Math.ceil(file.pages * progress / 100))} de ${file.pages}...`}
+              />
             )}
 
             {/* Done */}

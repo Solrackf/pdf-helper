@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ScissorsLineDashed, Loader2, Download, Plus, Trash2, FileCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DropZone } from '../components/DropZone'
+import { HeartProgress } from '../components/HeartProgress'
 import { loadPdf, extractPages, downloadBytes, formatBytes } from '../lib/pdfUtils'
 import { useToast } from '../context/ToastContext'
 
@@ -16,6 +17,7 @@ export function Split() {
   const [file, setFile]         = useState<SplitFile | null>(null)
   const [loading, setLoading]   = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [ranges, setRanges]     = useState<Range[]>([{ id: newId(), label: 'Parte 1', from: 1, to: 1 }])
 
   const handleFile = async (files: File[]) => {
@@ -42,8 +44,9 @@ export function Split() {
 
   const handleSplit = async () => {
     if (!file) return
-    setProcessing(true)
-    for (const range of ranges) {
+    setProcessing(true); setProgress(0)
+    for (let ri = 0; ri < ranges.length; ri++) {
+      const range = ranges[ri]
       try {
         const pages: number[] = []
         for (let i = range.from; i <= range.to; i++) pages.push(i)
@@ -51,12 +54,14 @@ export function Split() {
         const bytes = await extractPages(file.data, pages, 'medium')
         const name = file.name.replace('.pdf', `_${range.label.replace(/\s+/g,'_')}.pdf`)
         downloadBytes(bytes, name)
+        setProgress(Math.round(((ri + 1) / ranges.length) * 100))
       } catch (e: unknown) {
         toast(`Error en "${range.label}": ${e instanceof Error ? e.message : 'Error'}`, 'error')
       }
     }
+    await new Promise(r => setTimeout(r, 500))
     toast(`${ranges.length} parte${ranges.length !== 1 ? 's' : ''} descargada${ranges.length !== 1 ? 's' : ''} 💚`, 'success')
-    setProcessing(false)
+    setProcessing(false); setProgress(0)
   }
 
   return (
@@ -190,12 +195,16 @@ export function Split() {
               </div>
             </div>
 
+            {processing && (
+              <HeartProgress progress={progress} label={`Dividiendo parte ${Math.ceil(ranges.length * progress / 100)} de ${ranges.length}...`} />
+            )}
+
             <motion.button
               onClick={handleSplit}
               disabled={processing}
               whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
               style={{ background: 'linear-gradient(135deg,#43e583,#0fa34a)', boxShadow: '0 4px 16px rgba(27,204,97,0.35)' }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold disabled:opacity-40 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold disabled:opacity-40 transition-all mt-2"
             >
               {processing ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
               {processing ? 'Dividiendo...' : `Dividir en ${ranges.length} parte${ranges.length !== 1 ? 's' : ''}`}

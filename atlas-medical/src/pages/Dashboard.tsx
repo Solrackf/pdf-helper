@@ -131,7 +131,7 @@ export function Dashboard() {
             transition={{ delay: 0.4, duration: 0.4 }}
             className="text-white/70 mt-2 text-sm"
           >
-            Atlas Medical Toolkit · Procesamiento 100% local ❤️
+            Atlas Morita Toolkit · Procesamiento 100% local ❤️
           </motion.p>
         </div>
 

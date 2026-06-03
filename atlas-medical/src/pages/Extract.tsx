@@ -3,6 +3,7 @@ import { Scissors, X, ChevronDown, Loader2, Download, Trash2, Heart } from 'luci
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
+import { HeartProgress } from '../components/HeartProgress'
 import { useStore } from '../store/useStore'
 import { useToast } from '../context/ToastContext'
 import {
@@ -272,15 +273,7 @@ export function Extract() {
           </div>
 
           {processing && (
-            <div>
-              <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>
-                <span>Procesando...</span>
-                <span>{progress}%</span>
-              </div>
-              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(27,204,97,0.15)' }}>
-                <div style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #43e583, #0fa34a)' }} className="h-2 rounded-full transition-all duration-300" />
-              </div>
-            </div>
+            <HeartProgress progress={progress} label="Extrayendo páginas..." />
           )}
 
           <button

@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Atlas Medical Toolkit',
+        name: 'Atlas Morita Toolkit',
         short_name: 'Atlas',
         description: 'Plataforma médica de gestión documental',
         theme_color: '#0f172a',

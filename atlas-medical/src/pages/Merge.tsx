@@ -3,6 +3,7 @@ import { Layers, X, GripVertical, Loader2, Download, Trash2, ArrowUp, ArrowDown 
 import { motion } from 'framer-motion'
 import { clsx } from 'clsx'
 import { DropZone } from '../components/DropZone'
+import { HeartProgress } from '../components/HeartProgress'
 import { useStore } from '../store/useStore'
 import { useToast } from '../context/ToastContext'
 import {
@@ -20,6 +21,7 @@ export function Merge() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [compression, setCompression] = useState<Compression>('medium')
   const [outputName, setOutputName] = useState('expediente_consolidado.pdf')
   const [dragOverId, setDragOverId] = useState<string | null>(null)
@@ -76,16 +78,20 @@ export function Merge() {
 
   const handleMerge = async () => {
     if (mergeFiles.length < 2) { toast('Agrega al menos 2 documentos', 'warning'); return }
-    setProcessing(true)
+    setProcessing(true); setProgress(0)
+    const tick = setInterval(() => setProgress(p => Math.min(p + 8, 88)), 180)
     try {
       const bytes = await mergeDocuments(mergeFiles.map((f) => f.data), compression)
+      clearInterval(tick); setProgress(100)
+      await new Promise(r => setTimeout(r, 400))
       downloadBytes(bytes, outputName.endsWith('.pdf') ? outputName : outputName + '.pdf')
       toast('Expediente generado correctamente', 'success')
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Error desconocido'
+      clearInterval(tick)
       toast(`Error al unir documentos: ${msg}`, 'error')
     }
-    setProcessing(false)
+    setProcessing(false); setProgress(0)
   }
 
   return (
@@ -201,11 +207,13 @@ export function Merge() {
             </div>
           </div>
 
+          {processing && <HeartProgress progress={progress} label="Uniendo documentos..." />}
+
           <button
             onClick={handleMerge}
             disabled={processing || mergeFiles.length < 2}
-            style={{ background: 'linear-gradient(135deg, #81f4ae, #0fa34a)', boxShadow: '0 4px 16px rgba(27,204,97,0.35)' }}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 disabled:shadow-none text-white rounded-xl font-semibold transition-all"
+            style={{ background: 'linear-gradient(135deg, #43e583, #0fa34a)', boxShadow: '0 4px 16px rgba(27,204,97,0.35)' }}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 disabled:opacity-40 text-white rounded-xl font-semibold transition-all"
           >
             {processing ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
             {processing ? 'Generando expediente...' : 'Generar expediente unificado'}

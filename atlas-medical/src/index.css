@@ -23,12 +23,14 @@
   --brand-border: var(--cg-200);
 
   /* semantic — light mode */
-  --text-primary:   #033017;   /* cg-950 — máximo contraste */
-  --text-secondary: #10853f;   /* cg-700 */
-  --text-muted:     #126936;   /* cg-800 */
-  --surface:        rgba(255,255,255,0.75);
-  --surface-muted:  rgba(239,254,244,0.8);
-  --border:         rgba(184,250,209,0.6);  /* cg-200 */
+  --bg-page:        #effef4;
+  --text-primary:   #033017;
+  --text-secondary: #10853f;
+  --text-muted:     #126936;
+  --surface:        rgba(255,255,255,0.78);
+  --surface-muted:  rgba(239,254,244,0.85);
+  --border:         rgba(129,244,174,0.45);
+  --orb-opacity:    0.35;
 }
 
 body.dark {
@@ -36,12 +38,14 @@ body.dark {
   --brand-border:   var(--cg-900);
 
   /* semantic — dark mode */
-  --text-primary:   #effef4;   /* cg-50 */
-  --text-secondary: #81f4ae;   /* cg-300 */
-  --text-muted:     #43e583;   /* cg-400 */
-  --surface:        rgba(3,48,23,0.7);   /* cg-950 base */
-  --surface-muted:  rgba(3,48,23,0.5);
-  --border:         rgba(27,204,97,0.2); /* cg-500 */
+  --bg-page:        #033017;
+  --text-primary:   #effef4;
+  --text-secondary: #81f4ae;
+  --text-muted:     #43e583;
+  --surface:        rgba(5,28,16,0.82);
+  --surface-muted:  rgba(3,22,12,0.75);
+  --border:         rgba(27,204,97,0.22);
+  --orb-opacity:    0.55;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -56,14 +60,9 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #effef4;   /* cg-50 */
+  background-color: var(--bg-page);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body.dark {
-  background-color: #033017;   /* cg-950 */
-  color: var(--text-primary);
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 #root {
@@ -87,22 +86,24 @@ body.dark ::-webkit-scrollbar-thumb { background: #10853f; }
 }
 .glass-card {
   background: var(--surface);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 24px rgba(3,48,23,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
+  box-shadow: 0 4px 24px rgba(3,48,23,0.08), 0 1px 0 rgba(255,255,255,0.5) inset;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 body.dark .glass-card {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(27,204,97,0.08) inset;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(27,204,97,0.1) inset;
 }
 .glass-sidebar {
-  background: rgba(239,254,244,0.85);
+  background: rgba(239,254,244,0.88);
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
   border-right: 1px solid var(--border);
+  transition: background 0.4s ease;
 }
 body.dark .glass-sidebar {
-  background: rgba(3,48,23,0.88);
+  background: rgba(3,22,12,0.92);
   border-right: 1px solid rgba(27,204,97,0.18);
 }
 
@@ -153,7 +154,29 @@ body.dark .glass-sidebar {
   70%       { transform: scale(1); }
 }
 
-.float-heart { animation: floatHeart 3.5s ease-in-out infinite; }
+.float-heart  { animation: floatHeart 3.5s ease-in-out infinite; }
+
+/* ── Floating hearts (global rain) ────────────────────────── */
+@keyframes heartRise {
+  0%   { transform: translateY(0) scale(0.8) rotate(-15deg); opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(-120px) scale(1.1) rotate(15deg); opacity: 0; }
+}
+.heart-rise { animation: heartRise var(--dur, 4s) ease-in-out var(--delay, 0s) infinite; }
+
+/* ── Animated progress bar ─────────────────────────────────── */
+@keyframes progressShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.progress-bar {
+  background: linear-gradient(90deg, #43e583, #1bcc61, #43e583);
+  background-size: 200% 100%;
+  animation: progressShimmer 1.8s linear infinite;
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
 .pulse-glow  { animation: pulse-glow 2s ease-in-out infinite; }
 .heartbeat   { animation: heartbeat 1.8s ease-in-out infinite; }
 .gradient-animated {
